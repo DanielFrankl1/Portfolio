@@ -355,10 +355,9 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
     <h1>Daniel Frankl</h1>
     <p class="hero-role">Mechanical engineering student specialising in precision design, FEA and medical devices — following a research placement designing a prosthetic foot interface at the eNABLe Lab, Technion.</p>
     <div class="hero-actions">
-      <a class="btn primary" href="Daniel_Frankl_CV.pdf" download>Download CV</a>
-      <a class="btn" href="mailto:daniel.frankl@example.com">Get in touch</a>
+      <a class="btn primary" href="mailto:daniel.frankl@hotmail.com">Get in touch</a>
       <a class="btn" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-      <a class="btn" href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+      <a class="btn" href="https://www.linkedin.com/in/daniel-frankl-329a23381/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </header>
 
@@ -378,9 +377,9 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
   <footer>
     <p>Daniel Frankl — built with HTML, CSS and JSON.</p>
     <div class="footer-links">
-      <a href="mailto:daniel.frankl@example.com">Email</a>
+      <a href="mailto:daniel.frankl@hotmail.com">Email</a>
       <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
-      <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+      <a href="https://www.linkedin.com/in/daniel-frankl-329a23381/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </footer>
 
@@ -450,14 +449,15 @@ const PROJECTS = [
     "category": "mechatronics",
     "categoryLabel": "Embedded software",
     "featured": false,
-    "stat": null,
-    "statLabel": null,
-    "summary": "Wrote low-level C++ flight control code for a small drone platform, covering stabilisation and basic manual control response.",
+    "stat": "1st in project",
+    "statLabel": "Ranking",
+    "summary": "Programmed an Arduino-based drone controller in C++ to maintain a set flight height for a set duration.",
     "role": "Sole developer.",
-    "approach": "Implemented sensor-fusion-driven stabilisation logic and tuned control response in C++, testing incrementally on hardware.",
-    "outcome": "Achieved stable hover and responsive manual control on the target hardware.",
-    "tools": ["C++", "Embedded control", "Sensor fusion"],
+    "approach": "Implemented PI control logic in C++ to hold a target flight height over a fixed duration, tuning gains through iterative testing on hardware.",
+    "outcome": "Adjusted the code based on output data (RPM, drone weight) to bring the average error down to zero, achieving 1st in the project.",
+    "tools": ["C++", "PI control", "Sensor fusion"],
     "image": null,
+    "video": "drone-flight-video.mp4",
     "links": []
   },
   {
