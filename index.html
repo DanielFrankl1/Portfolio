@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Daniel Frankl — Mechanical Engineering Portfolio</title>
+<meta name="description" content="Mechanical engineering portfolio of Daniel Frankl — prosthetics, CAD, FEA and design projects.">
+<meta name="robots" content="noindex, nofollow">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:wght@500;600&family=Inter:wght@400;500&family=IBM+Plex+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+/* ---------- tokens ---------- */
+:root {
+  --bg: #FAFAF8;
+  --surface: #FFFFFF;
+  --surface-sunken: #F1F0EB;
+  --text-primary: #16181A;
+  --text-secondary: #5B5F63;
+  --text-muted: #91948F;
+  --border: #E4E2DC;
+  --border-strong: #CFCCC2;
+
+  --medical: #0F6E56;
+  --medical-bg: #E1F5EE;
+  --medical-dark: #04342C;
+
+  --mechanical: #3C3489;
+  --mechanical-bg: #EEEDFE;
+  --mechanical-dark: #26215C;
+
+  --mechatronics: #99351D;
+  --mechatronics-bg: #FAECE7;
+  --mechatronics-dark: #4A1B0C;
+
+  --software: #99355A;
+  --software-bg: #FBEAF0;
+  --software-dark: #4B1528;
+
+  --font-display: "Fraunces", Georgia, serif;
+  --font-body: "Inter", -apple-system, sans-serif;
+  --font-mono: "IBM Plex Mono", ui-monospace, monospace;
+
+  --radius: 10px;
+  --radius-lg: 16px;
+  --max-width: 980px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--text-primary);
+  font-family: var(--font-body);
+  font-size: 16px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap {
+  max-width: var(--max-width);
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+a { color: inherit; }
+
+/* ---------- dimension-tick divider (signature element) ---------- */
+.tick-divider {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0 0 28px;
+  color: var(--text-muted);
+}
+.tick-divider::before,
+.tick-divider::after {
+  content: "";
+  flex: 1;
+  height: 1px;
+  background: var(--border-strong);
+  background-image: repeating-linear-gradient(90deg, var(--border-strong) 0 1px, transparent 1px 8px);
+}
+.tick-divider span {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+/* ---------- header / hero ---------- */
+header.hero {
+  padding: 72px 0 48px;
+  border-bottom: 1px solid var(--border);
+}
+.hero-eyebrow {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--mechanical);
+  margin: 0 0 14px;
+}
+.hero h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 46px;
+  line-height: 1.1;
+  margin: 0 0 12px;
+  letter-spacing: -0.01em;
+}
+.hero-role {
+  font-size: 18px;
+  color: var(--text-secondary);
+  margin: 0 0 22px;
+  max-width: 560px;
+}
+.hero-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+.btn {
+  font-family: var(--font-body);
+  font-size: 14px;
+  font-weight: 500;
+  padding: 10px 18px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-primary);
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  transition: border-color 0.15s ease, transform 0.1s ease;
+}
+.btn:hover { border-color: var(--text-primary); }
+.btn:active { transform: scale(0.98); }
+.btn.primary {
+  background: var(--text-primary);
+  color: var(--surface);
+  border-color: var(--text-primary);
+}
+.btn.primary:hover { opacity: 0.88; }
+
+/* ---------- filter pills ---------- */
+.filters {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin: 40px 0 32px;
+}
+.filter-pill {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 7px 14px;
+  border-radius: 100px;
+  border: 1px solid var(--border-strong);
+  background: var(--surface);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.filter-pill:hover { border-color: var(--text-primary); color: var(--text-primary); }
+.filter-pill.active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--surface);
+}
+
+/* ---------- sections ---------- */
+section { padding: 8px 0 56px; }
+.section-heading {
+  font-family: var(--font-display);
+  font-size: 22px;
+  font-weight: 600;
+  margin: 0 0 4px;
+}
+
+/* ---------- featured grid ---------- */
+.featured-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+}
+
+/* ---------- project card ---------- */
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  cursor: pointer;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.card:hover { border-color: var(--border-strong); box-shadow: 0 2px 14px rgba(20,20,18,0.05); }
+
+.card-image {
+  aspect-ratio: 16/9;
+  background: var(--surface-sunken);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  border-bottom: 1px solid var(--border);
+}
+
+.card-body { padding: 18px 20px 20px; }
+
+.card-tag {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  letter-spacing: 0.03em;
+  padding: 4px 10px;
+  border-radius: 100px;
+  margin-bottom: 12px;
+}
+.card-tag.medical { background: var(--medical-bg); color: var(--medical-dark); }
+.card-tag.mechanical { background: var(--mechanical-bg); color: var(--mechanical-dark); }
+.card-tag.mechatronics { background: var(--mechatronics-bg); color: var(--mechatronics-dark); }
+.card-tag.software { background: var(--software-bg); color: var(--software-dark); }
+
+.card h3 {
+  font-family: var(--font-display);
+  font-size: 19px;
+  font-weight: 600;
+  margin: 0 0 6px;
+  line-height: 1.3;
+}
+.card-subtitle {
+  font-size: 13px;
+  color: var(--text-muted);
+  margin: 0 0 12px;
+}
+.card-summary {
+  font-size: 14px;
+  color: var(--text-secondary);
+  margin: 0 0 14px;
+}
+.card-stat {
+  font-family: var(--font-mono);
+  font-size: 13px;
+  color: var(--text-primary);
+  border-top: 1px solid var(--border);
+  padding-top: 12px;
+  display: flex;
+  justify-content: space-between;
+}
+.card-stat b { font-weight: 600; }
+
+/* ---------- all-projects grid ---------- */
+.all-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+}
+.all-grid .card-body { padding: 16px 18px 18px; }
+.all-grid h3 { font-size: 16px; }
+
+/* ---------- detail panel ---------- */
+.detail-panel {
+  display: none;
+  background: var(--surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  padding: 28px 30px;
+  margin: -4px 0 24px;
+}
+.detail-panel.open { display: block; }
+.detail-panel h4 {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  margin: 20px 0 6px;
+}
+.detail-panel h4:first-of-type { margin-top: 0; }
+.detail-panel p { margin: 0; font-size: 15px; color: var(--text-secondary); }
+.tools-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 4px;
+}
+.tools-list span {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  background: var(--surface-sunken);
+  border: 1px solid var(--border);
+  padding: 5px 10px;
+  border-radius: 6px;
+  color: var(--text-primary);
+}
+.detail-close {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 20px;
+}
+.detail-close:hover { color: var(--text-primary); }
+
+/* ---------- footer ---------- */
+footer {
+  border-top: 1px solid var(--border);
+  padding: 32px 0 60px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+footer p { margin: 0; font-size: 13px; color: var(--text-muted); }
+.footer-links { display: flex; gap: 18px; }
+.footer-links a { font-size: 13px; color: var(--text-secondary); text-decoration: none; }
+.footer-links a:hover { color: var(--text-primary); }
+
+/* ---------- responsive ---------- */
+@media (max-width: 720px) {
+  .hero h1 { font-size: 34px; }
+  .featured-grid, .all-grid { grid-template-columns: 1fr; }
+  header.hero { padding: 48px 0 36px; }
+}
+
+/* ---------- focus states ---------- */
+a:focus-visible, button:focus-visible, .card:focus-visible {
+  outline: 2px solid var(--mechanical);
+  outline-offset: 2px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { transition: none !important; }
+}
+
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <header class="hero">
+    <p class="hero-eyebrow">Mechanical engineering — University of Leeds</p>
+    <h1>Daniel Frankl</h1>
+    <p class="hero-role">Mechanical engineering student specialising in precision design, FEA and medical devices — following a research placement designing a prosthetic foot interface at the eNABLe Lab, Technion.</p>
+    <div class="hero-actions">
+      <a class="btn primary" href="Daniel_Frankl_CV.pdf" download>Download CV</a>
+      <a class="btn" href="mailto:daniel.frankl@example.com">Get in touch</a>
+      <a class="btn" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+      <a class="btn" href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </header>
+
+  <section id="featured">
+    <div class="tick-divider"><span>Featured work</span></div>
+    <div class="featured-grid" id="featured-grid"></div>
+  </section>
+
+  <section id="all-projects">
+    <h2 class="section-heading">All projects</h2>
+    <div class="filters" id="filters"></div>
+    <div class="all-grid" id="all-grid"></div>
+  </section>
+
+  <div class="detail-panel" id="detail-panel"></div>
+
+  <footer>
+    <p>Daniel Frankl — built with HTML, CSS and JSON.</p>
+    <div class="footer-links">
+      <a href="mailto:daniel.frankl@example.com">Email</a>
+      <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
+      <a href="https://linkedin.com/" target="_blank" rel="noopener">LinkedIn</a>
+    </div>
+  </footer>
+
+</div>
+
+<script>
+const PROJECTS = [
+  {
+    "id": "prosthetic-interface",
+    "title": "Modular quick-connect prosthetic foot interface",
+    "subtitle": "eNABLe Lab, Technion — Summer 2026 research placement",
+    "category": "medical",
+    "categoryLabel": "Medical device",
+    "featured": true,
+    "stat": "3-DOF mechanism",
+    "statLabel": "FEA-validated",
+    "summary": "Designed and FEA-validated a modular quick-connect interface for a prosthetic foot, enabling rapid tool-free swaps between foot components.",
+    "role": "Sole design engineer on the mechanism, working within an established research lab methodology.",
+    "approach": "Built a 3-degree-of-freedom connector mechanism in SolidWorks, then validated it under simulated gait loading using Winter's inverse dynamics method to derive realistic joint forces across the gait cycle. Ran static and fatigue FEA in SolidWorks Simulation against ISO 10328 and ISO 24562 structural test requirements for prosthetic components.",
+    "outcome": "Mechanism passed simulated ISO loading cases with margin, with a full validation report suitable for onward physical prototyping.",
+    "tools": ["SolidWorks", "SolidWorks Simulation (FEA)", "GD&T", "ISO 10328", "ISO 24562", "Winter's inverse dynamics"],
+    "image": null,
+    "video": "prosthetic-interface-video.mp4",
+    "report": "Modular_Prosthetic_Interface_Report.pdf",
+    "links": []
+  },
+  {
+    "id": "micro-hydro-turbine",
+    "title": "Micro-hydroelectric turbine",
+    "subtitle": "University of Leeds design competition — ranked 1st of 33 teams",
+    "category": "mechanical",
+    "categoryLabel": "Mechanical design",
+    "featured": true,
+    "stat": "1st / 33 teams",
+    "statLabel": "Competition ranking",
+    "summary": "Designed a small-scale hydroelectric turbine for a low head-height site, optimised for manufacturability and power output within a fixed budget and material set.",
+    "role": "Design lead within a small team, responsible for the runner geometry and structural validation.",
+    "approach": "Iterated blade and runner geometry using hand calculations and CAD-based flow reasoning, then validated the housing and shaft under load using FEA. Manufactured components on the CNC mill and lathe.",
+    "outcome": "Highest power output-to-cost ratio of all 33 competing teams, placing the design first overall.",
+    "tools": ["SolidWorks", "FEA", "CNC machining", "Manufacturing for cost"],
+    "image": null,
+    "links": []
+  },
+  {
+    "id": "daring-dash-buggy",
+    "title": "The Daring Dash — autonomous buggy",
+    "subtitle": "University of Leeds team project",
+    "category": "mechatronics",
+    "categoryLabel": "Mechatronics",
+    "featured": false,
+    "stat": "Payload delivered",
+    "statLabel": "Target reached",
+    "summary": "Built an autonomous buggy capable of navigating a fixed course without manual control, combining custom chassis design with Arduino-based sensing and control.",
+    "role": "Mechanical design and build, working alongside teammates on the control logic.",
+    "approach": "Machined and assembled the chassis and drivetrain, then integrated ultrasonic and line-following sensors with an Arduino controller to drive navigation decisions.",
+    "outcome": "On its competition run, the buggy navigated the course autonomously and deposited its payload in the target zone, meeting the competition's timing and reliability requirements.",
+    "tools": ["SolidWorks", "Arduino", "CNC machining", "Sensor integration"],
+    "image": "buggy-final-build.jpg",
+    "video": "buggy-run-video.mp4",
+    "gallery": ["buggy-final-build.jpg", "buggy-payload-target.jpg"],
+    "links": []
+  },
+  {
+    "id": "drone-cpp-control",
+    "title": "Drone flight control in C++",
+    "subtitle": "Independent project",
+    "category": "mechatronics",
+    "categoryLabel": "Embedded software",
+    "featured": false,
+    "stat": null,
+    "statLabel": null,
+    "summary": "Wrote low-level C++ flight control code for a small drone platform, covering stabilisation and basic manual control response.",
+    "role": "Sole developer.",
+    "approach": "Implemented sensor-fusion-driven stabilisation logic and tuned control response in C++, testing incrementally on hardware.",
+    "outcome": "Achieved stable hover and responsive manual control on the target hardware.",
+    "tools": ["C++", "Embedded control", "Sensor fusion"],
+    "image": null,
+    "links": []
+  },
+  {
+    "id": "asa-datafest-hackathon",
+    "title": "ASA DataFest — Best Data Visualisation",
+    "subtitle": "University of Leeds Mathematics Department hackathon",
+    "category": "software",
+    "categoryLabel": "Data science",
+    "featured": false,
+    "stat": "Best Data Visualisation",
+    "statLabel": "Award won",
+    "summary": "Won Best Data Visualisation at the ASA DataFest hackathon, analysing a large real-world dataset against the clock as part of a 4-person team.",
+    "role": "Worked within a team of four, taking ownership of a subset of the analysis and contributing to the final presentation design.",
+    "approach": "The team isolated three core problems within a large, messy real-world dataset and split the workload accordingly. Cleaned and manipulated large CSV files in Excel, applied machine learning models and statistical correlation tests in Python to surface faults and relationships in the data, then built a PowerPoint presentation to communicate the findings clearly to a panel of judges.",
+    "outcome": "Awarded Best Data Visualisation from the judging panel for presenting complex findings in a clear, visual, and easy-to-understand way.",
+    "tools": ["Python", "Machine learning", "Statistical correlation analysis", "Excel", "Data cleaning", "PowerPoint"],
+    "image": "datafest-award.jpg",
+    "links": []
+  }
+];
+
+function cardHTML(p) {
+  const img = p.image
+    ? `<img src="${p.image}" alt="${p.title}" style="width:100%;height:100%;object-fit:cover">`
+    : p.video
+    ? `<video src="${p.video}" style="width:100%;height:100%;object-fit:cover" autoplay muted loop playsinline></video>`
+    : `render pending`;
+  const stat = p.stat
+    ? `<div class="card-stat"><span>${p.statLabel || ""}</span><b>${p.stat}</b></div>`
+    : "";
+  return `
+    <article class="card" data-id="${p.id}" tabindex="0" role="button" aria-expanded="false">
+      <div class="card-image">${img}</div>
+      <div class="card-body">
+        <span class="card-tag ${p.category}">${p.categoryLabel}</span>
+        <h3>${p.title}</h3>
+        <p class="card-subtitle">${p.subtitle}</p>
+        <p class="card-summary">${p.summary}</p>
+        ${stat}
+      </div>
+    </article>`;
+}
+
+function detailHTML(p) {
+  const tools = p.tools.map(t => `<span>${t}</span>`).join("");
+  const video = p.video
+    ? `<div style="display:flex;justify-content:center;margin-top:16px;"><video src="${p.video}" controls loop playsinline style="max-height:420px;max-width:100%;width:auto;border-radius:10px;border:1px solid var(--border);display:block;"></video></div>`
+    : "";
+  const gallery = p.gallery && p.gallery.length
+    ? `<div style="display:grid;grid-template-columns:repeat(${p.gallery.length},1fr);gap:8px;margin-top:12px;">${p.gallery.map(g => `<img src="${g}" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;aspect-ratio:4/3;">`).join("")}</div>`
+    : "";
+  const report = p.report
+    ? `<h4>Full report</h4><p><a class="btn" href="${p.report}" target="_blank" rel="noopener">View full report (PDF) ↗</a></p>`
+    : "";
+  return `
+    <span class="card-tag ${p.category}">${p.categoryLabel}</span>
+    <h3 style="font-family:var(--font-display);font-size:24px;margin:14px 0 4px;">${p.title}</h3>
+    <p class="card-subtitle" style="margin-bottom:0;">${p.subtitle}</p>
+    ${video}
+    ${gallery}
+
+    <h4>Role</h4>
+    <p>${p.role}</p>
+
+    <h4>Approach</h4>
+    <p>${p.approach}</p>
+
+    <h4>Outcome</h4>
+    <p>${p.outcome}</p>
+
+    <h4>Tools and methods</h4>
+    <div class="tools-list">${tools}</div>
+
+    ${report}
+
+    <button class="detail-close" id="close-detail">Close ↑</button>`;
+}
+
+function openDetail(project) {
+  const panel = document.getElementById("detail-panel");
+  panel.innerHTML = detailHTML(project);
+  panel.classList.add("open");
+  panel.scrollIntoView({ behavior: "smooth", block: "center" });
+  document.getElementById("close-detail").addEventListener("click", () => {
+    panel.classList.remove("open");
+  });
+}
+
+function attachCardHandlers(container, projects) {
+  container.querySelectorAll(".card").forEach(card => {
+    const open = () => {
+      const project = projects.find(p => p.id === card.dataset.id);
+      openDetail(project);
+    };
+    card.addEventListener("click", open);
+    card.addEventListener("keydown", e => {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); open(); }
+    });
+  });
+}
+
+function renderFilters(projects) {
+  const cats = [...new Map(projects.map(p => [p.category, p.categoryLabel])).entries()];
+  const filters = document.getElementById("filters");
+  filters.innerHTML = `<button class="filter-pill active" data-category="all">All</button>` +
+    cats.map(([key, label]) => `<button class="filter-pill" data-category="${key}">${label}</button>`).join("");
+
+  filters.querySelectorAll(".filter-pill").forEach(btn => {
+    btn.addEventListener("click", () => {
+      filters.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("active"));
+      btn.classList.add("active");
+      renderAllGrid(projects, btn.dataset.category);
+    });
+  });
+}
+
+function renderAllGrid(projects, category = "all") {
+  const grid = document.getElementById("all-grid");
+  const filtered = category === "all" ? projects : projects.filter(p => p.category === category);
+  grid.innerHTML = filtered.map(cardHTML).join("");
+  attachCardHandlers(grid, projects);
+}
+
+function renderFeatured(projects) {
+  const grid = document.getElementById("featured-grid");
+  const featured = projects.filter(p => p.featured);
+  grid.innerHTML = featured.map(cardHTML).join("");
+  attachCardHandlers(grid, projects);
+}
+
+renderFeatured(PROJECTS);
+renderFilters(PROJECTS);
+renderAllGrid(PROJECTS);
+
+</script>
+</body>
+</html>
