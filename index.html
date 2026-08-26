@@ -36,6 +36,13 @@
   --software-bg: #FBEAF0;
   --software-dark: #4B1528;
 
+  --control-systems: #1D6B99;
+  --control-systems-bg: #E5F1FB;
+  --control-systems-dark: #0D3350;
+
+  --skill-peach-bg: #FBE9E3;
+  --skill-peach-dark: #5C2A1B;
+
   --font-display: "Fraunces", Georgia, serif;
   --font-body: "Inter", -apple-system, sans-serif;
   --font-mono: "IBM Plex Mono", ui-monospace, monospace;
@@ -93,6 +100,7 @@ a { color: inherit; }
 header.hero {
   padding: 72px 0 48px;
   border-bottom: 1px solid var(--border);
+  text-align: center;
 }
 .hero-eyebrow {
   font-family: var(--font-mono);
@@ -113,13 +121,14 @@ header.hero {
 .hero-role {
   font-size: 18px;
   color: var(--text-secondary);
-  margin: 0 0 22px;
+  margin: 0 auto 22px;
   max-width: 560px;
 }
 .hero-actions {
   display: flex;
   gap: 10px;
   flex-wrap: wrap;
+  justify-content: center;
 }
 .btn {
   font-family: var(--font-body);
@@ -170,6 +179,21 @@ header.hero {
   border-color: var(--text-primary);
   color: var(--surface);
 }
+.filter-pill.skill { border-style: dashed; border-color: transparent; }
+.filter-pill.skill.active { border-style: solid; }
+.filter-pill.skill[data-value="Python"] { background: var(--software-bg); color: var(--software-dark); }
+.filter-pill.skill[data-value="C++"] { background: var(--software-bg); color: var(--software-dark); }
+.filter-pill.skill[data-value="SolidWorks"] { background: var(--mechanical-bg); color: var(--mechanical-dark); }
+.filter-pill.skill[data-value="FEA"] { background: var(--mechanical-bg); color: var(--mechanical-dark); }
+.filter-pill.skill[data-value="Arduino"] { background: var(--control-systems-bg); color: var(--control-systems-dark); }
+.filter-pill.skill[data-value="GD&T"] { background: var(--mechanical-bg); color: var(--mechanical-dark); }
+.filter-pill.skill[data-value="Machine learning"] { background: var(--software-bg); color: var(--software-dark); }
+.filter-pill.skill[data-value="CNC machining"] { background: var(--skill-peach-bg); color: var(--skill-peach-dark); }
+.filter-pill.skill[data-value="PI control"] { background: var(--control-systems-bg); color: var(--control-systems-dark); }
+.filter-pill.skill.active[data-value] {
+  background: var(--text-primary) !important;
+  color: var(--surface) !important;
+}
 
 /* ---------- sections ---------- */
 section { padding: 8px 0 56px; }
@@ -178,13 +202,6 @@ section { padding: 8px 0 56px; }
   font-size: 22px;
   font-weight: 600;
   margin: 0 0 4px;
-}
-
-/* ---------- featured grid ---------- */
-.featured-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
 }
 
 /* ---------- project card ---------- */
@@ -227,6 +244,7 @@ section { padding: 8px 0 56px; }
 .card-tag.mechanical { background: var(--mechanical-bg); color: var(--mechanical-dark); }
 .card-tag.mechatronics { background: var(--mechatronics-bg); color: var(--mechatronics-dark); }
 .card-tag.software { background: var(--software-bg); color: var(--software-dark); }
+.card-tag.control-systems { background: var(--control-systems-bg); color: var(--control-systems-dark); }
 
 .card h3 {
   font-family: var(--font-display);
@@ -330,7 +348,7 @@ footer p { margin: 0; font-size: 13px; color: var(--text-muted); }
 /* ---------- responsive ---------- */
 @media (max-width: 720px) {
   .hero h1 { font-size: 34px; }
-  .featured-grid, .all-grid { grid-template-columns: 1fr; }
+  .all-grid { grid-template-columns: 1fr; }
   header.hero { padding: 48px 0 36px; }
 }
 
@@ -356,18 +374,12 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
     <p class="hero-role">Final-year Mechanical Engineering student (1st Class) with hands-on CAD and FEA-based design experience spanning prosthetics, renewable energy systems and mechatronics. Proven track record delivering competition-winning designs (1st out of 33 teams) and conducting research at a leading biomechanics lab (Technion).</p>
     <div class="hero-actions">
       <a class="btn primary" href="mailto:daniel.frankl@hotmail.com">Get in touch</a>
-      <a class="btn" href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
       <a class="btn" href="https://www.linkedin.com/in/daniel-frankl-329a23381/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </header>
 
-  <section id="featured">
-    <div class="tick-divider"><span>Featured work</span></div>
-    <div class="featured-grid" id="featured-grid"></div>
-  </section>
-
   <section id="all-projects">
-    <h2 class="section-heading">All projects</h2>
+    <div class="tick-divider"><span>Projects</span></div>
     <div class="filters" id="filters"></div>
     <div class="all-grid" id="all-grid"></div>
   </section>
@@ -378,7 +390,6 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
     <p>Daniel Frankl — built with HTML, CSS and JSON.</p>
     <div class="footer-links">
       <a href="mailto:daniel.frankl@hotmail.com">Email</a>
-      <a href="https://github.com/" target="_blank" rel="noopener">GitHub</a>
       <a href="https://www.linkedin.com/in/daniel-frankl-329a23381/" target="_blank" rel="noopener">LinkedIn</a>
     </div>
   </footer>
@@ -427,8 +438,8 @@ const PROJECTS = [
     "id": "daring-dash-buggy",
     "title": "The Daring Dash — autonomous buggy",
     "subtitle": "University of Leeds team project",
-    "category": "mechatronics",
-    "categoryLabel": "Mechatronics",
+    "category": "control-systems",
+    "categoryLabel": "Control systems",
     "featured": false,
     "stat": "Payload delivered",
     "statLabel": "Target reached",
@@ -455,7 +466,7 @@ const PROJECTS = [
     "role": "Sole developer.",
     "approach": "Implemented PI control logic in C++ to hold a target flight height over a fixed duration, tuning gains through iterative testing on hardware.",
     "outcome": "Adjusted the code based on output data (RPM, drone weight) to bring the average error down to zero, achieving 1st in the project.",
-    "tools": ["C++", "PI control", "Sensor fusion"],
+    "tools": ["C++", "Arduino", "PI control", "Sensor fusion"],
     "image": null,
     "video": "drone-flight-video.mp4",
     "links": []
@@ -559,36 +570,47 @@ function attachCardHandlers(container, projects) {
   });
 }
 
+const SKILL_FILTERS = [
+  "Python", "C++", "SolidWorks", "FEA", "Arduino",
+  "GD&T", "Machine learning", "CNC machining", "PI control"
+];
+
 function renderFilters(projects) {
   const cats = [...new Map(projects.map(p => [p.category, p.categoryLabel])).entries()];
   const filters = document.getElementById("filters");
-  filters.innerHTML = `<button class="filter-pill active" data-category="all">All</button>` +
-    cats.map(([key, label]) => `<button class="filter-pill" data-category="${key}">${label}</button>`).join("");
+
+  const catButtons = cats.map(([key, label]) =>
+    `<button class="filter-pill" data-type="category" data-value="${key}">${label}</button>`).join("");
+  const skillButtons = SKILL_FILTERS.map(skill =>
+    `<button class="filter-pill skill" data-type="skill" data-value="${skill}">${skill}</button>`).join("");
+
+  filters.innerHTML =
+    `<button class="filter-pill active" data-type="all" data-value="all">All</button>` +
+    catButtons + skillButtons;
 
   filters.querySelectorAll(".filter-pill").forEach(btn => {
     btn.addEventListener("click", () => {
       filters.querySelectorAll(".filter-pill").forEach(b => b.classList.remove("active"));
       btn.classList.add("active");
-      renderAllGrid(projects, btn.dataset.category);
+      renderAllGrid(projects, btn.dataset.type, btn.dataset.value);
     });
   });
 }
 
-function renderAllGrid(projects, category = "all") {
+function renderAllGrid(projects, type = "all", value = "all") {
   const grid = document.getElementById("all-grid");
-  const filtered = category === "all" ? projects : projects.filter(p => p.category === category);
-  grid.innerHTML = filtered.map(cardHTML).join("");
+  let filtered = projects;
+  if (type === "category") {
+    filtered = projects.filter(p => p.category === value);
+  } else if (type === "skill") {
+    filtered = projects.filter(p => p.tools.some(t => t.toLowerCase().includes(value.toLowerCase())));
+  }
+  grid.innerHTML = filtered.length
+    ? filtered.map(cardHTML).join("")
+    : `<p style="color:var(--text-muted);grid-column:1/-1;">No projects match that filter yet.</p>`;
   attachCardHandlers(grid, projects);
 }
 
-function renderFeatured(projects) {
-  const grid = document.getElementById("featured-grid");
-  const featured = projects.filter(p => p.featured);
-  grid.innerHTML = featured.map(cardHTML).join("");
-  attachCardHandlers(grid, projects);
-}
-
-renderFeatured(PROJECTS);
 renderFilters(PROJECTS);
 renderAllGrid(PROJECTS);
 
