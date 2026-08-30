@@ -428,10 +428,10 @@ const PROJECTS = [
     "statLabel": "Competition ranking",
     "summary": "Designed a small-scale hydroelectric turbine for a low head-height site, optimised for manufacturability and power output within a fixed budget and material set.",
     "role": "Design lead within a small team, responsible for the runner geometry and structural validation.",
-    "approach": "Iterated blade and runner geometry using hand calculations and CAD-based flow reasoning, then validated the housing and shaft under load using FEA. Manufactured components on the CNC mill and lathe.",
+    "approach": "Iterated blade and runner geometry using hand calculations and CAD-based flow reasoning, then validated the housing and shaft under load using FEA. Manufactured components using 3D printing and laser-cut acrylic.",
     "outcome": "Highest power output-to-cost ratio of all 33 competing teams, placing the design first overall.",
-    "tools": ["SolidWorks", "FEA", "CNC machining", "Manufacturing for cost"],
-    "image": null,
+    "tools": ["SolidWorks", "FEA", "3D printing", "Acrylic fabrication", "Manufacturing for cost"],
+    "image": "turbine-poster.jpg",
     "links": []
   },
   {
@@ -450,7 +450,7 @@ const PROJECTS = [
     "tools": ["SolidWorks", "Arduino", "CNC machining", "Sensor integration"],
     "image": "buggy-final-build.jpg",
     "video": "buggy-run-video.mp4",
-    "gallery": ["buggy-final-build.jpg", "buggy-payload-target.jpg"],
+    "gallery": ["buggy-final-build.jpg", "buggy-payload-target.jpg", "buggy-poster.jpg"],
     "links": []
   },
   {
@@ -518,7 +518,10 @@ function detailHTML(p) {
     ? `<div style="display:flex;justify-content:center;margin-top:16px;"><video src="${p.video}" controls loop playsinline style="max-height:420px;max-width:100%;width:auto;border-radius:10px;border:1px solid var(--border);display:block;"></video></div>`
     : "";
   const gallery = p.gallery && p.gallery.length
-    ? `<div style="display:grid;grid-template-columns:repeat(${p.gallery.length},1fr);gap:8px;margin-top:12px;">${p.gallery.map(g => `<img src="${g}" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;aspect-ratio:4/3;">`).join("")}</div>`
+    ? `<div style="display:grid;grid-template-columns:repeat(${p.gallery.length},1fr);gap:8px;margin-top:12px;">${p.gallery.map(g => `<a href="${g}" target="_blank" rel="noopener"><img src="${g}" style="width:100%;border-radius:10px;border:1px solid var(--border);object-fit:cover;aspect-ratio:4/3;cursor:zoom-in;"></a>`).join("")}</div>`
+    : "";
+  const singleImage = (!p.video && !(p.gallery && p.gallery.length) && p.image)
+    ? `<div style="margin-top:16px;"><a href="${p.image}" target="_blank" rel="noopener"><img src="${p.image}" alt="${p.title}" style="width:100%;border-radius:10px;border:1px solid var(--border);display:block;cursor:zoom-in;"></a></div>`
     : "";
   const report = p.report
     ? `<h4>Full report</h4><p><a class="btn" href="${p.report}" target="_blank" rel="noopener">View full report (PDF) ↗</a></p>`
@@ -528,6 +531,7 @@ function detailHTML(p) {
     <h3 style="font-family:var(--font-display);font-size:24px;margin:14px 0 4px;">${p.title}</h3>
     <p class="card-subtitle" style="margin-bottom:0;">${p.subtitle}</p>
     ${video}
+    ${singleImage}
     ${gallery}
 
     <h4>Role</h4>

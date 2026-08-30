@@ -6,12 +6,16 @@ separated when you download or move files around:
 ```
 index.html
 robots.txt
+LICENSE
 prosthetic-interface-video.mp4
 Modular_Prosthetic_Interface_Report.pdf
 datafest-award.jpg
 buggy-run-video.mp4
 buggy-final-build.jpg
 buggy-payload-target.jpg
+buggy-poster.jpg
+drone-flight-video.mp4
+turbine-poster.jpg
 ```
 
 **Important:** all files must stay in the same folder as `index.html`.
