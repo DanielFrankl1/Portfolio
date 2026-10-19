@@ -330,6 +330,24 @@ section { padding: 8px 0 56px; }
 }
 .detail-close:hover { color: var(--text-primary); }
 
+/* ---------- gait visualiser ---------- */
+.gait { margin: 8px 0 56px; }
+.gait-intro { max-width: 640px; color: var(--text-secondary); font-size: 15px; margin: 0 0 18px; }
+.gait-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; }
+.gait-stage { position: relative; background: var(--surface-sunken); border-radius: var(--radius); overflow: hidden; }
+.gait-stage canvas { display: block; width: 100%; }
+.gait-readout { display: flex; flex-wrap: wrap; gap: 8px 22px; margin: 12px 2px 4px; font-family: var(--font-mono); font-size: 12.5px; color: var(--text-secondary); }
+.gait-readout b { color: var(--text-primary); font-weight: 500; }
+.gait-phase { font-family: var(--font-display); font-size: 18px; color: var(--text-primary); margin: 10px 2px 0; }
+.gait-controls { display: grid; grid-template-columns: auto 1fr; gap: 10px 14px; align-items: center; margin-top: 14px; }
+.gait-controls label { font-size: 13px; color: var(--text-secondary); }
+.gait-controls input[type=range] { width: 100%; accent-color: var(--medical); }
+.gait-controls .row { display: contents; }
+.gait-play { font: inherit; font-size: 13px; padding: 7px 14px; border-radius: 999px; border: 1px solid var(--border-strong); background: var(--surface); color: var(--text-primary); cursor: pointer; }
+.gait-play:hover { background: var(--surface-sunken); }
+.gait-note { font-size: 12.5px; color: var(--text-muted); margin: 14px 2px 0; max-width: 720px; }
+@media (max-width: 720px) { .gait-controls { grid-template-columns: 1fr; gap: 4px; } .gait-controls label { margin-top: 6px; } }
+
 /* ---------- footer ---------- */
 footer {
   border-top: 1px solid var(--border);
@@ -385,6 +403,35 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
   </section>
 
   <div class="detail-panel" id="detail-panel"></div>
+
+  <section class="gait" id="gait">
+    <div class="tick-divider"><span>Interactive</span></div>
+    <h2 style="font-family:var(--font-display);font-size:26px;margin:0 0 8px;">Gait cycle visualiser</h2>
+    <p class="gait-intro">A prosthetic foot sees the same loading twice every step. Scrub through one gait cycle to see the leg pose and the vertical ground reaction force that passes through the quick-connect interface.</p>
+    <div class="gait-card">
+      <div class="gait-stage">
+        <canvas id="gait-canvas" role="img" aria-label="Animated side view of a walking leg with a prosthetic foot interface and the ground reaction force arrow"></canvas>
+      </div>
+      <p class="gait-phase" id="gait-phase">Heel strike</p>
+      <div class="gait-readout">
+        <span>Cycle <b id="gait-pct">0%</b></span>
+        <span>Prosthetic side <b id="gait-state">stance</b></span>
+        <span>Vertical GRF <b id="gait-grf">0 N</b> (<b id="gait-bw">0.00</b> × BW)</span>
+      </div>
+      <div class="stage" style="margin-top:10px;background:var(--surface-sunken);border-radius:var(--radius);">
+        <canvas id="gait-plot" style="display:block;width:100%;" role="img" aria-label="Vertical ground reaction force through one gait cycle, with two peaks during stance"></canvas>
+      </div>
+      <div class="gait-controls">
+        <button class="gait-play" id="gait-play" type="button">Pause</button>
+        <input type="range" id="gait-scrub" min="0" max="100" step="0.1" value="0" aria-label="Position in gait cycle (percent)">
+        <label for="gait-speed">Playback speed</label>
+        <input type="range" id="gait-speed" min="0.1" max="1.5" step="0.05" value="0.6">
+        <label for="gait-mass">Body mass: <span id="gait-mass-val">75</span> kg</label>
+        <input type="range" id="gait-mass" min="45" max="120" step="1" value="75">
+      </div>
+      <p class="gait-note">Illustrative only: joint angles and force curve are smoothed approximations of typical level-walking (normative) sagittal-plane patterns, not the lab data or the loads from the report. The foot is treated as rigid and the far leg is shown in grey.</p>
+    </div>
+  </section>
 
   <footer>
     <p>Daniel Frankl — built with HTML, CSS and JSON.</p>
@@ -618,6 +665,238 @@ function renderAllGrid(projects, type = "all", value = "all") {
 renderFilters(PROJECTS);
 renderAllGrid(PROJECTS);
 
+</script>
+<script>
+(function () {
+  const stageCanvas = document.getElementById("gait-canvas");
+  const plotCanvas = document.getElementById("gait-plot");
+  const playBtn = document.getElementById("gait-play");
+  const scrub = document.getElementById("gait-scrub");
+  const speedEl = document.getElementById("gait-speed");
+  const massEl = document.getElementById("gait-mass");
+  const massVal = document.getElementById("gait-mass-val");
+  const phaseEl = document.getElementById("gait-phase");
+  const pctEl = document.getElementById("gait-pct");
+  const stateEl = document.getElementById("gait-state");
+  const grfEl = document.getElementById("gait-grf");
+  const bwEl = document.getElementById("gait-bw");
+  if (!stageCanvas || !plotCanvas) return;
+
+  const css = getComputedStyle(document.documentElement);
+  const col = n => css.getPropertyValue(n).trim();
+  const C = {
+    ground: col("--border-strong"), text: col("--text-secondary"), muted: col("--text-muted"),
+    prosth: col("--medical"), prosthBg: col("--medical-bg"), far: "#B9B6AC",
+    force: col("--mechatronics"), dark: col("--text-primary"), surface: col("--surface")
+  };
+
+  // ---- normative-style keyframes (% gait cycle -> value), periodic ----
+  const HIP   = [[0,30],[12,25],[30,5],[50,-10],[60,-8],[75,15],[90,30],[100,30]];
+  const KNEE  = [[0,5],[10,15],[25,8],[40,5],[50,15],[60,35],[73,60],[87,30],[100,5]];
+  const ANKLE = [[0,0],[8,-5],[30,8],[48,10],[62,-15],[75,0],[100,0]];   // + = dorsiflexion
+  const GRF   = [[0,0],[3,0.7],[15,1.1],[30,0.8],[45,1.1],[57,0.4],[60,0],[100,0]]; // x body weight
+  const PHASES = [
+    [0,"Heel strike"],[2,"Loading response"],[12,"Mid-stance"],[31,"Terminal stance"],
+    [50,"Pre-swing (toe-off)"],[62,"Initial swing"],[75,"Mid-swing"],[87,"Terminal swing"]
+  ];
+  const STANCE_END = 60;
+  const L1 = 0.43, L2 = 0.43;           // thigh, shank (m)
+  const HEEL = [-0.05, -0.08], TOE = [0.18, -0.08]; // in foot frame, from ankle (m)
+  const rad = d => d * Math.PI / 180;
+
+  function interp(keys, p) {
+    p = ((p % 100) + 100) % 100;
+    for (let i = 0; i < keys.length - 1; i++) {
+      const [a, va] = keys[i], [b, vb] = keys[i + 1];
+      if (p >= a && p <= b) {
+        const t = (p - a) / (b - a), e = (1 - Math.cos(Math.PI * t)) / 2;
+        return va + (vb - va) * e;
+      }
+    }
+    return keys[0][1];
+  }
+
+  // Leg kinematics relative to the hip (x forward, y up).
+  function leg(p) {
+    const tt = rad(interp(HIP, p));
+    const ts = tt - rad(interp(KNEE, p));
+    const knee = [L1 * Math.sin(tt), -L1 * Math.cos(tt)];
+    const ankle = [knee[0] + L2 * Math.sin(ts), knee[1] - L2 * Math.cos(ts)];
+    const a = ts + rad(interp(ANKLE, p));
+    const u = [Math.cos(a), Math.sin(a)], v = [-Math.sin(a), Math.cos(a)];
+    const at = f => [ankle[0] + f[0] * u[0] + f[1] * v[0], ankle[1] + f[0] * u[1] + f[1] * v[1]];
+    return { knee, ankle, heel: at(HEEL), toe: at(TOE), a };
+  }
+
+  // Pre-compute hip height and forward travel so the lowest foot point stays on the ground.
+  const N = 400, hipY = new Float64Array(N + 1), hipX = new Float64Array(N + 1);
+  (function build() {
+    const pts = i => {
+      const A = leg(i * 100 / N), B = leg((i * 100 / N + 50) % 100);
+      return [A.heel, A.toe, B.heel, B.toe];
+    };
+    let x = 0;
+    for (let i = 0; i <= N; i++) {
+      const P = pts(i);
+      let low = 0;
+      for (let k = 1; k < 4; k++) if (P[k][1] < P[low][1]) low = k;
+      hipY[i] = -P[low][1];
+      hipX[i] = x;
+      if (i < N) x -= pts(i + 1)[low][0] - P[low][0];   // contact point is fixed in the world
+    }
+  })();
+  const STRIDE = hipX[N];
+  const lerpTable = (T, p) => { const f = (((p % 100) + 100) % 100) / 100 * N, i = Math.floor(f); return T[i] + (T[Math.min(i + 1, N)] - T[i]) * (f - i); };
+
+  // ---- state ----
+  let p = 0, cycles = 0, playing = true, visible = true, last = null;
+  const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  if (reduceMotion) { playing = false; playBtn.textContent = "Play"; }
+
+  function fit(canvas, h) {
+    const dpr = window.devicePixelRatio || 1, w = canvas.parentElement.clientWidth;
+    canvas.width = Math.round(w * dpr); canvas.height = Math.round(h * dpr);
+    canvas.style.height = h + "px";
+    const ctx = canvas.getContext("2d"); ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    return { ctx, w, h };
+  }
+
+  function drawStage() {
+    const h = Math.max(240, Math.min(340, stageCanvas.parentElement.clientWidth * 0.5));
+    const { ctx, w } = fit(stageCanvas, h);
+    ctx.clearRect(0, 0, w, h);
+    const scale = h / 1.45, gy = h * 0.88, hx = w * 0.42;
+    const hy = gy - lerpTable(hipY, p) * scale;
+    const hipWorld = cycles * STRIDE + lerpTable(hipX, p);
+    const S = pt => [hx + pt[0] * scale, hy - pt[1] * scale];
+
+    // ground with scrolling ticks
+    ctx.strokeStyle = C.ground; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(0, gy); ctx.lineTo(w, gy); ctx.stroke();
+    ctx.lineWidth = 1; ctx.fillStyle = C.muted; ctx.font = "11px 'IBM Plex Mono', monospace";
+    const spacing = 0.25, first = Math.floor((hipWorld - hx / scale) / spacing) * spacing;
+    for (let wx = first; wx < hipWorld + (w - hx) / scale + spacing; wx += spacing) {
+      const sx = hx + (wx - hipWorld) * scale;
+      ctx.beginPath(); ctx.moveTo(sx, gy); ctx.lineTo(sx, gy + 7); ctx.stroke();
+    }
+    ctx.fillText("walking →", 12, gy + 26);
+
+    const near = leg(p), far = leg((p + 50) % 100);
+
+    function drawLeg(L, color, width, prosthetic) {
+      const k = S(L.knee), a = S(L.ankle), hp = S(L.heel), tp = S(L.toe);
+      ctx.lineCap = "round"; ctx.lineJoin = "round";
+      ctx.strokeStyle = color; ctx.lineWidth = width;
+      ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(k[0], k[1]); ctx.stroke();
+      ctx.lineWidth = prosthetic ? width * 0.55 : width;
+      ctx.beginPath(); ctx.moveTo(k[0], k[1]); ctx.lineTo(a[0], a[1]); ctx.stroke();
+      // foot
+      ctx.fillStyle = color;
+      ctx.beginPath(); ctx.moveTo(hp[0], hp[1]); ctx.lineTo(tp[0], tp[1]); ctx.lineTo(a[0], a[1]); ctx.closePath(); ctx.fill();
+      ctx.lineWidth = 4; ctx.stroke();
+      // joints
+      ctx.fillStyle = C.surface; ctx.strokeStyle = color; ctx.lineWidth = 2;
+      [[hx, hy, 5], [k[0], k[1], 5]].forEach(([x, y, r]) => { ctx.beginPath(); ctx.arc(x, y, r, 0, 7); ctx.fill(); ctx.stroke(); });
+      if (prosthetic) {
+        // quick-connect interface between pylon and foot
+        const m = [a[0] - (a[0] - k[0]) * 0.1, a[1] - (a[1] - k[1]) * 0.1];
+        ctx.fillStyle = C.dark; ctx.beginPath(); ctx.arc(m[0], m[1], 7, 0, 7); ctx.fill();
+        ctx.fillStyle = C.surface; ctx.beginPath(); ctx.arc(m[0], m[1], 2.5, 0, 7); ctx.fill();
+        return m;
+      }
+    }
+
+    // torso stub
+    ctx.strokeStyle = "#CFCCC2"; ctx.lineWidth = 16; ctx.lineCap = "round";
+    ctx.beginPath(); ctx.moveTo(hx, hy); ctx.lineTo(hx, hy - 0.5 * scale); ctx.stroke();
+
+    drawLeg(far, C.far, 9, false);
+    drawLeg(near, C.prosth, 11, true);
+
+    // ground reaction force on the prosthetic foot
+    const g = interp(GRF, p);
+    if (g > 0.02) {
+      const s = Math.min(1, p / STANCE_END);
+      const cop = S([near.heel[0] + (near.toe[0] - near.heel[0]) * s, near.heel[1] + (near.toe[1] - near.heel[1]) * s]);
+      const len = g * 0.42 * scale;
+      ctx.strokeStyle = C.force; ctx.fillStyle = C.force; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(cop[0], cop[1]); ctx.lineTo(cop[0], cop[1] - len + 8); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(cop[0], cop[1] - len); ctx.lineTo(cop[0] - 6, cop[1] - len + 11); ctx.lineTo(cop[0] + 6, cop[1] - len + 11); ctx.closePath(); ctx.fill();
+      ctx.font = "12px 'IBM Plex Mono', monospace";
+      ctx.fillText("GRF", cop[0] + 10, cop[1] - len + 12);
+    }
+
+    // legend
+    ctx.font = "12px Inter, sans-serif"; ctx.textAlign = "left";
+    ctx.fillStyle = C.dark; ctx.beginPath(); ctx.arc(22, 24, 6, 0, 7); ctx.fill();
+    ctx.fillStyle = C.surface; ctx.beginPath(); ctx.arc(22, 24, 2.5, 0, 7); ctx.fill();
+    ctx.fillStyle = C.dark; ctx.fillText("Quick-connect interface", 34, 28);
+    ctx.fillStyle = C.force; ctx.fillRect(16, 44, 12, 3);
+    ctx.fillStyle = C.dark; ctx.fillText("Ground reaction force", 34, 49);
+  }
+
+  function drawPlot() {
+    const { ctx, w, h } = fit(plotCanvas, 120);
+    ctx.clearRect(0, 0, w, h);
+    const L = 44, R = 12, T = 12, B = 26, pw = w - L - R, ph = h - T - B, ymax = 1.3;
+    const X = q => L + q / 100 * pw, Y = v => T + ph - v / ymax * ph;
+    ctx.fillStyle = C.prosthBg; ctx.fillRect(X(0), T, X(STANCE_END) - X(0), ph);
+    ctx.font = "10.5px 'IBM Plex Mono', monospace"; ctx.fillStyle = C.muted; ctx.textAlign = "center";
+    ctx.fillText("stance", X(30), T + 11); ctx.fillText("swing", X(80), T + 11);
+    ctx.strokeStyle = C.ground; ctx.lineWidth = 1;
+    [0, 0.5, 1].forEach(v => { ctx.beginPath(); ctx.moveTo(L, Y(v)); ctx.lineTo(w - R, Y(v)); ctx.stroke(); });
+    ctx.textAlign = "right"; [0, 0.5, 1].forEach(v => ctx.fillText(v.toFixed(1), L - 6, Y(v) + 4));
+    ctx.textAlign = "center"; [0, 25, 50, 75, 100].forEach(q => ctx.fillText(q + "%", X(q), h - 8));
+    ctx.strokeStyle = C.force; ctx.lineWidth = 2; ctx.beginPath();
+    for (let q = 0; q <= 100; q += 0.5) { const x = X(q), y = Y(interp(GRF, q)); q === 0 ? ctx.moveTo(x, y) : ctx.lineTo(x, y); }
+    ctx.stroke();
+    ctx.fillStyle = C.dark; ctx.beginPath(); ctx.arc(X(p % 100), Y(interp(GRF, p)), 5, 0, 7); ctx.fill();
+    ctx.strokeStyle = C.muted; ctx.setLineDash([3, 3]); ctx.beginPath(); ctx.moveTo(X(p % 100), T); ctx.lineTo(X(p % 100), T + ph); ctx.stroke(); ctx.setLineDash([]);
+    ctx.save(); ctx.translate(11, T + ph / 2); ctx.rotate(-Math.PI / 2); ctx.textAlign = "center"; ctx.fillStyle = C.muted; ctx.fillText("× body weight", 0, 0); ctx.restore();
+  }
+
+  function readout() {
+    const pp = ((p % 100) + 100) % 100;
+    let name = PHASES[0][1];
+    PHASES.forEach(([s, n]) => { if (pp >= s) name = n; });
+    phaseEl.textContent = name;
+    pctEl.textContent = Math.round(pp) + "%";
+    stateEl.textContent = pp < STANCE_END ? "stance" : "swing";
+    const g = interp(GRF, pp);
+    grfEl.textContent = Math.round(g * massEl.value * 9.81) + " N";
+    bwEl.textContent = g.toFixed(2);
+  }
+
+  function render() { drawStage(); drawPlot(); readout(); }
+
+  function tick(t) {
+    if (last !== null && playing && visible) {
+      const dt = Math.min(0.05, (t - last) / 1000);
+      p += dt / 1.2 * 100 * parseFloat(speedEl.value);
+      while (p >= 100) { p -= 100; cycles++; }
+      scrub.value = p;
+      render();
+    }
+    last = t;
+    requestAnimationFrame(tick);
+  }
+
+  playBtn.addEventListener("click", () => {
+    playing = !playing; playBtn.textContent = playing ? "Pause" : "Play"; last = null;
+  });
+  scrub.addEventListener("input", () => {
+    playing = false; playBtn.textContent = "Play";
+    p = parseFloat(scrub.value); cycles = 0; render();
+  });
+  massEl.addEventListener("input", () => { massVal.textContent = massEl.value; readout(); });
+  window.addEventListener("resize", render);
+  if ("IntersectionObserver" in window) {
+    new IntersectionObserver(e => { visible = e[0].isIntersecting; if (visible) last = null; }, { threshold: 0.05 })
+      .observe(stageCanvas);
+  }
+  render();
+  requestAnimationFrame(tick);
+})();
 </script>
 </body>
 </html>
