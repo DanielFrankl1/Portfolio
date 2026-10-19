@@ -332,6 +332,13 @@ section { padding: 8px 0 56px; }
 
 /* ---------- gait visualiser ---------- */
 .gait { margin: 8px 0 56px; }
+.gait-toggle { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 16px; text-align: left; font: inherit; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 18px 20px; cursor: pointer; color: var(--text-primary); transition: border-color .15s, background .15s; }
+.gait-toggle:hover { border-color: var(--border-strong); background: var(--surface-sunken); }
+.gait-toggle .t { display: block; font-family: var(--font-display); font-size: 20px; }
+.gait-toggle .d { display: block; font-size: 13.5px; color: var(--text-secondary); margin-top: 4px; }
+.gait-toggle .chev { flex: none; width: 30px; height: 30px; border-radius: 50%; border: 1px solid var(--border-strong); display: grid; place-items: center; font-family: var(--font-mono); font-size: 18px; line-height: 1; color: var(--text-secondary); }
+.gait-panel { margin-top: 14px; }
+.gait-panel[hidden] { display: none; }
 .gait-intro { max-width: 640px; color: var(--text-secondary); font-size: 15px; margin: 0 0 18px; }
 .gait-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 14px; }
 .gait-stage { position: relative; background: var(--surface-sunken); border-radius: var(--radius); overflow: hidden; }
@@ -406,7 +413,11 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
 
   <section class="gait" id="gait">
     <div class="tick-divider"><span>Interactive</span></div>
-    <h2 style="font-family:var(--font-display);font-size:26px;margin:0 0 8px;">Gait cycle visualiser</h2>
+    <button class="gait-toggle" id="gait-toggle" type="button" aria-expanded="false" aria-controls="gait-panel">
+      <span><span class="t">Gait cycle visualiser</span><span class="d">Interactive: see the loading a prosthetic foot interface takes through one step</span></span>
+      <span class="chev" id="gait-chev" aria-hidden="true">+</span>
+    </button>
+    <div class="gait-panel" id="gait-panel" hidden>
     <p class="gait-intro">A prosthetic foot sees the same loading twice every step. Scrub through one gait cycle to see the leg pose and the vertical ground reaction force that passes through the quick-connect interface.</p>
     <div class="gait-card">
       <div class="gait-stage">
@@ -430,6 +441,7 @@ a:focus-visible, button:focus-visible, .card:focus-visible {
         <input type="range" id="gait-mass" min="45" max="120" step="1" value="75">
       </div>
       <p class="gait-note">Illustrative only: joint angles and force curve are smoothed approximations of typical level-walking (normative) sagittal-plane patterns, not the lab data or the loads from the report. The foot is treated as rigid and the far leg is shown in grey.</p>
+    </div>
     </div>
   </section>
 
@@ -749,7 +761,7 @@ renderAllGrid(PROJECTS);
   const lerpTable = (T, p) => { const f = (((p % 100) + 100) % 100) / 100 * N, i = Math.floor(f); return T[i] + (T[Math.min(i + 1, N)] - T[i]) * (f - i); };
 
   // ---- state ----
-  let p = 0, cycles = 0, playing = true, visible = true, last = null;
+  let p = 0, cycles = 0, playing = true, visible = true, last = null, open = false;
   const reduceMotion = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
   if (reduceMotion) { playing = false; playBtn.textContent = "Play"; }
 
@@ -867,7 +879,7 @@ renderAllGrid(PROJECTS);
     bwEl.textContent = g.toFixed(2);
   }
 
-  function render() { drawStage(); drawPlot(); readout(); }
+  function render() { if (!open) return; drawStage(); drawPlot(); readout(); }
 
   function tick(t) {
     if (last !== null && playing && visible) {
@@ -890,11 +902,19 @@ renderAllGrid(PROJECTS);
   });
   massEl.addEventListener("input", () => { massVal.textContent = massEl.value; readout(); });
   window.addEventListener("resize", render);
+  const toggle = document.getElementById("gait-toggle"), panel = document.getElementById("gait-panel"), chev = document.getElementById("gait-chev");
+  toggle.addEventListener("click", () => {
+    open = !open;
+    panel.hidden = !open;
+    toggle.setAttribute("aria-expanded", open);
+    chev.textContent = open ? "\u2212" : "+";
+    last = null;
+    if (open) { render(); panel.scrollIntoView({ behavior: "smooth", block: "nearest" }); }
+  });
   if ("IntersectionObserver" in window) {
     new IntersectionObserver(e => { visible = e[0].isIntersecting; if (visible) last = null; }, { threshold: 0.05 })
       .observe(stageCanvas);
   }
-  render();
   requestAnimationFrame(tick);
 })();
 </script>
